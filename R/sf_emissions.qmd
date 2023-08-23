@@ -1,0 +1,61 @@
+---
+title: "SF_emissions"
+format: html
+editor: visual
+execute: 
+  warning: false
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+# Read in the SF emissions dataset, then complete the following:
+
+sf_emissions <- read_csv(here("data", "San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv"))
+```
+
+```{r}
+# Create a summary table of total annual greenhouse gas emissions (only from Emissions_mtCO2e column) by sector_general
+
+annual_by_sector <- sf_emissions %>% 
+  group_by(Sector_General) %>% 
+  summarize(sum(Emissions_mtCO2e))
+```
+
+```{r}
+# Create a summary table of total annual greenhouse gas emissions (only from Emissions_mtCO2e column) by year and commodity type
+
+annual_by_year_commodity <- sf_emissions %>% 
+  group_by(Calendar_Year, Commodity_Type) %>% 
+  summarize(sum(Emissions_mtCO2e))
+```
+
+```{r}
+# Create a subset of the data that only contains observations from 2005 on, only for observations where Sector_Detail2 contains the pattern “PG&E”, then limit to columns Calendar_Year, Sector_Detail2 and Emissions_mtCO2e.
+
+sf_emissions_2005 <- sf_emissions %>% 
+  filter(Calendar_Year > 2005) %>% 
+  select(Calendar_Year, Sector_Detail2, Emissions_mtCO2e) %>% 
+  filter(str_detect(Sector_Detail2, pattern = "PG&E"))
+  
+```
+
+## Make my best graph
+
+```{r}
+sf_emissions_mtCO2e <- sf_emissions %>% 
+  filter(Quantity_Units == "mtCO2e", Calendar_Year == 2019) %>% 
+  group_by(Sector_General) %>% 
+  summarize(emissions = sum(Emissions_mtCO2e, na.rm = TRUE))
+```
+
+```{r}
+ggplot(sf_emissions_mtCO2e, aes(x = emissions, y = Sector_General)) +
+  geom_col() +
+  labs(x = "Emissions (Metric tons of carbon dioxide equivalent)", y = "Sector", title = "Sum of Emissions by Sector for 2019")
+  
+  
+```
